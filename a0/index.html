@@ -13,6 +13,8 @@
       const tracePoints = [];
       let lastTick = -1;
 
+      let lastMinute = -1;
+
       function setup() {
         createCanvas(window.innerWidth, window.innerHeight);
         angleMode(DEGREES);
@@ -25,6 +27,11 @@
         clear();
         background(0);
         stroke(255);
+
+        if (minute() !== lastMinute) {
+          lastMinute = minute();
+          console.log(lastMinute);
+        }
 
         const handValues = [hour() % 12, minute(), second()];
         const handRange = [
