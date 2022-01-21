@@ -35,9 +35,9 @@
 
         const handValues = [hour() % 12, minute(), second()];
         const handRange = [
-          [0, 11],
-          [0, 59],
-          [0, 59],
+          [0, 12],
+          [0, 60],
+          [0, 60],
         ];
         const handAngles = handValues.map(
           (v, i) => map(v, handRange[i][0], handRange[i][1], 0, 360) - 90
