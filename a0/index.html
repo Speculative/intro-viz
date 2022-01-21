@@ -1,0 +1,104 @@
+<html>
+  <head>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+    <script type="text/javascript">
+      const TRACE_LENGTH = 3 * 60;
+      const tracePoints = [];
+      let lastTick = -1;
+
+      function setup() {
+        createCanvas(window.innerWidth, window.innerHeight);
+        angleMode(DEGREES);
+        window.addEventListener("resize", function () {
+          resizeCanvas(window.innerWidth, window.innerHeight);
+        });
+      }
+
+      function draw() {
+        clear();
+        background(0);
+        stroke(255);
+
+        const handValues = [hour() % 12, minute(), second()];
+        const handRange = [
+          [0, 11],
+          [0, 59],
+          [0, 59],
+        ];
+        const handAngles = handValues.map(
+          (v, i) => map(v, handRange[i][0], handRange[i][1], 0, 360) - 90
+        );
+        const handLengths = [0.5, 0.3, 0.1];
+        const handWidths = [4, 2, 1];
+
+        const maxR = min(width, height) / 2;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // Draw hands
+        let lastX = cx;
+        let lastY = cy;
+        for (let i = 0; i < handAngles.length; i++) {
+          const theta = handAngles[i];
+          const r = handLengths[i] * maxR;
+          const dx = r * cos(theta);
+          const dy = r * sin(theta);
+
+          circle(lastX, lastY, 5);
+          strokeWeight(handWidths[i]);
+          line(lastX, lastY, (lastX += dx), (lastY += dy));
+        }
+
+        const tick = handValues[handValues.length - 1];
+        if (
+          lastTick !== tick &&
+          tracePoints.unshift(handAngles) > TRACE_LENGTH
+        ) {
+          lastTick = tick;
+          tracePoints.pop();
+        }
+
+        // Draw trace
+        const toTip = (from) =>
+          from.reduce(
+            (prev, theta, i) => {
+              const baseX = prev[0];
+              const baseY = prev[1];
+
+              const r = handLengths[i] * maxR;
+              const dx = r * cos(theta);
+              const dy = r * sin(theta);
+
+              return [baseX + dx, baseY + dy];
+            },
+            [cx, cy]
+          );
+
+        let from = toTip(tracePoints[0]);
+        let fromX = from[0];
+        let fromY = from[1];
+        for (let i = 1; i < tracePoints.length; i++) {
+          const nextPoint = toTip(tracePoints[i]);
+          const nextX = nextPoint[0];
+          const nextY = nextPoint[1];
+
+          stroke(255 - map(i, 0, TRACE_LENGTH, 0, 255));
+          line(fromX, fromY, nextX, nextY);
+
+          fromX = nextX;
+          fromY = nextY;
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main></main>
+  </body>
+</html>
